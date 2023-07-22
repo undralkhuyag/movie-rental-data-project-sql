@@ -10,7 +10,7 @@ INNER JOIN language AS l
 WHERE name IN ('Italian', 'French')
   AND release_year = 2005 ;
 
-/* Preparing a list of top paying active customers with their names sorted by the amount they paid. */
+/* Pulling a list of top paying active customers with their names sorted by the amount they paid. */
 
 SELECT first_name, last_name,
 	   amount
