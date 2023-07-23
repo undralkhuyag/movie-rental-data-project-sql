@@ -1,5 +1,5 @@
 /* Below are the sql codes I've written for a case study where I applied skills such as storing, managing data in table and views. 
-skills used: aggregate functions, complex joins, creating Views, storing data. */
+skills used: aggregate functions, complex joins, creating Views, storing data, updating and editing tables */
 
 /* Pulling title & description from tables language & film, where Italian and French films were made in 2005 */
 
@@ -19,3 +19,72 @@ INNER JOIN customer AS c
   ON p.customer_id = c.customer_id
 WHERE active= 'true'
 ORDER BY amount desc;
+
+/* Adding comma to G-rated film titles by language released in 2010 */
+
+SELECT name, 
+	STRING_AGG(title, ',') AS film_titles
+FROM film AS f
+INNER JOIN language AS l
+  ON f.language_id = l.language_id
+WHERE release_year = 2010
+  AND rating = 'G'
+GROUP BY name;
+
+/* Finding what tables are in my database */
+
+SELECT * 
+FROM pg_catalog.pg_tables;
+
+/* From system table, information_schema.columns, concatenating the list of each table's columns into a single entry. Then, creating a view using this query called table_columns */
+
+SELECT table_name, 
+	   STRING_AGG(column_name, ', ') AS columns
+FROM information_schema.columns
+WHERE table_schema = 'public'
+GROUP BY table_name;
+
+--creating a view called table_columns, all data is stored in public schema--
+
+CREATE VIEW table_columns AS
+SELECT table_name, 
+	   STRING_AGG(column_name, ', ') AS columns
+FROM information_schema.columns
+WHERE table_schema = 'public'
+GROUP BY table_name;
+
+/* Using inner joins between 3 tables */
+
+SELECT title, COUNT(title) 
+FROM film AS f
+INNER JOIN inventory AS i
+  ON f.film_id = i.film_id
+INNER JOIN rental AS r
+  ON i.inventory_id = r.inventory_id
+GROUP BY title
+ORDER BY count DESC;
+
+/* creating new table called family_films that is rate G or PG using existing data from film */
+
+CREATE TABLE family_films AS
+SELECT *
+FROM film
+WHERE rating IN ('G', 'PG');
+
+/* updating table: lowering cost rental cost by 1 dollar of films who star the actors with following last names */
+
+UPDATE film
+SET rental_rate= rental_rate-1
+WHERE film_id in
+  (SELECT film_id from actor AS a
+   INNER JOIN film_actor AS f
+      ON a.actor_id = f.actor_id
+   WHERE last_name IN ('WILLIS', 'CHASE', 'WINSLET', 'GUINESS', 'HUDSON'));
+
+/* Deleting films with a rating of R or NC-17 from film table */
+
+DELETE FROM inventory
+WHERE film_id IN (
+  SELECT film_id FROM film
+  WHERE rating IN ('R', 'NC-17')
+);
