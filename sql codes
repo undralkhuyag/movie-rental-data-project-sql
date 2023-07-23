@@ -84,7 +84,6 @@ WHERE film_id in
 /* Deleting films with a rating of R or NC-17 from film table */
 
 DELETE FROM inventory
-WHERE film_id IN (
-  SELECT film_id FROM film
-  WHERE rating IN ('R', 'NC-17')
-);
+WHERE film_id IN 
+(SELECT film_id FROM film
+  WHERE rating IN ('R', 'NC-17'));
